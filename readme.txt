@@ -4,3 +4,5 @@ G code commands are divided into basic commands and specific commands. Here, bas
 whose expressions and meanings are similar or the same among different G code programming languages,
 such as "G0\G00" often means rapid traverse. In contrast, specific commands refer to commands that are different
 among different G code programming languages. 
+
+Therefore, we label interpreters as basic interpreters and specific interpreters.
