@@ -1,0 +1,29 @@
+﻿<Window x:Class="Presentation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Presentation"
+        xmlns:node ="clr-namespace:BasicInterpreter;assembly=BasicInterpreter"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="70*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0" Grid.ColumnSpan="1" Content="Expression:" Margin="10,10,0,0"/>
+        <TextBox Grid.Column="0" Grid.ColumnSpan="1" Margin="10,40,0,0" Width="150"  Height="30" Name="txt"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"/>
+        <Button Grid.Column="0" Grid.ColumnSpan="1" Content="Generate" Margin="10,80,0,0" Width="100"
+                Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" 
+                Command="{Binding Path=GenerateCommand}" CommandParameter="{Binding ElementName=txt, Path=Text}"/>
+        <TreeView Grid.Column="1" Grid.ColumnSpan="1" ItemsSource="{Binding Path=Nodes}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type node:TreeNode}" ItemsSource="{Binding Path=childNodes}">
+                    <Label Content="{Binding Path=name}"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </Grid>
+</Window>
