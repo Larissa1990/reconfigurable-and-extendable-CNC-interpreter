@@ -11,18 +11,21 @@ namespace BasicInterpreter
     {
         private static List<string> singleWords = new List<string>()
         {
-            "N","T","X","Y","Z","I","J","K","S","D","F","C"
+            "N","T","X","Y","Z","I","J","K","S","D","F"
         };
-        public static string ConvertProgram(string program)
+        public static string ConvertProgram(List<string>program)
         {
-            throw new NotImplementedException();
+            string _program = null;
+            foreach (var item in program)
+                _program = _program + ConvertEachBlock(item) + "\r\n";
+            return _program;
         }
 
         private static string ConvertEachBlock(string block)
         {
-            throw new NotImplementedException();
             string[] terms = block.Split(' ');
             List<string> _terms = new List<string>();
+
             foreach(var item in terms)
             {
                 if (item.Length == 1)
@@ -32,10 +35,34 @@ namespace BasicInterpreter
                     else
                     {
                         // 这里需要百度一下，判断字符串是否为数字的方法，使用正则表达式
+                        Func<string, bool> isNumber = (word) =>
+                        {
+                            return true;
+                        };
+                        if (isNumber(item))
+                            _terms.Add(item);
                     }
                 }
-
+                else
+                {
+                    if (singleWords.Contains(item.Substring(0, 1)))
+                    {
+                        if (item.Substring(1, 1) == "=")
+                            _terms.Add(item);
+                        else
+                        {
+                            _terms.Add(item.Substring(0, 1) + "=" + item.Substring(1));
+                        }
+                    }
+                    else
+                        _terms.Add(item);
+                }
             }
+
+            string line = null;
+            foreach (var item in _terms)
+                line = line + item + " ";
+            return line.TrimEnd() + ";";
         }
 
         public static List<TreeNode>GenerateTreeNode(string expression)
@@ -90,6 +117,7 @@ namespace BasicInterpreter
                 return mainNodes;
             }
         }
+
 
 
     }

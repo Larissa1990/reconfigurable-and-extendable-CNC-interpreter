@@ -2,6 +2,8 @@
 using Irony.Parsing;
 using BasicInterpreter;
 using System.Collections.Generic;
+using System.IO;
+
 
 namespace UnitTest
 {
@@ -9,6 +11,22 @@ namespace UnitTest
     {
         static void Main(string[] args)
         {
+            string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";
+            using(StreamReader sr = new StreamReader(path))
+            {
+                List<string> program = new List<string>();
+                string line = sr.ReadLine();
+                while (line != null)
+                {
+                    program.Add(line);
+                    line = sr.ReadLine();
+                }
+
+                string _program = BasicInterpreter.Methods.ConvertProgram(program);
+                Console.WriteLine(_program);
+
+            }
+            /*
             Grammar _grammar = new LexicalAndSyntaxAnalysis();
             LanguageData _language = new LanguageData(_grammar);
             Parser _parser = new Parser(_language);
@@ -30,7 +48,7 @@ namespace UnitTest
                 {
                     WriteNode(parseTree.Root,"");
                 }
-            }
+            }*/
             Console.Read();
         }
 
