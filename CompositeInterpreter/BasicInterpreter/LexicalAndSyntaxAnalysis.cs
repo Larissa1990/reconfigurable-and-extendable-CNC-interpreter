@@ -207,8 +207,8 @@ namespace BasicInterpreter
 
 
             #endregion
-            //this.Root = ncBlocks;
-            this.Root = expression;
+            this.Root = ncBlocks;
+            //this.Root = expression;
         }
 
 

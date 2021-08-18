@@ -3,6 +3,7 @@ using Irony.Parsing;
 using BasicInterpreter;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 
 namespace UnitTest
@@ -14,16 +15,19 @@ namespace UnitTest
             string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";
             using(StreamReader sr = new StreamReader(path))
             {
-                List<string> program = new List<string>();
-                string line = sr.ReadLine();
+                string program = sr.ReadToEnd();
+
+                List<string> programs = program.Split("\r\n").ToList();
+                Console.WriteLine(programs.Count);
+                /*string line = sr.ReadLine();
+                List<string> programs = new List<string>();
                 while (line != null)
                 {
-                    program.Add(line);
+                    programs.Add(line);
                     line = sr.ReadLine();
                 }
-
-                string _program = BasicInterpreter.Methods.ConvertProgram(program);
-                Console.WriteLine(_program);
+                string _program = Methods.ConvertProgram(programs);
+                Console.WriteLine(_program);*/
 
             }
             /*

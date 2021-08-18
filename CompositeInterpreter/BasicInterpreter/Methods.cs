@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Irony.Parsing;
+using System.Text.RegularExpressions;
+using System.IO;
 
 namespace BasicInterpreter
 {
@@ -13,11 +15,26 @@ namespace BasicInterpreter
         {
             "N","T","X","Y","Z","I","J","K","S","D","F"
         };
-        public static string ConvertProgram(List<string>program)
+        public static string ConvertProgram(List<string> programs)
         {
+
             string _program = null;
-            foreach (var item in program)
-                _program = _program + ConvertEachBlock(item) + "\r\n";
+            string line = null;
+            foreach (var item in programs)
+            {
+                line = ConvertEachBlock(item);
+                if (line.Contains("Error"))
+                    return line;
+                else
+                {
+                    if (programs.IndexOf(item) != programs.Count - 1)
+                        _program = _program + line + "\r\n";
+                    else
+                        _program = _program + line;
+                }
+
+            }
+
             return _program;
         }
 
@@ -26,21 +43,22 @@ namespace BasicInterpreter
             string[] terms = block.Split(' ');
             List<string> _terms = new List<string>();
 
-            foreach(var item in terms)
+            foreach (var item in terms)
             {
                 if (item.Length == 1)
                 {
-                    if(singleWords.Contains(item))
+                    if (singleWords.Contains(item))
                         _terms.Add(item + "=");
                     else
                     {
-                        // 这里需要百度一下，判断字符串是否为数字的方法，使用正则表达式
                         Func<string, bool> isNumber = (word) =>
                         {
-                            return true;
+                            return Regex.Match(word, "^(-?\\d+)(\\.\\d+)?").Success;
                         };
                         if (isNumber(item))
                             _terms.Add(item);
+                        else
+                            return "Error Message";
                     }
                 }
                 else
@@ -65,8 +83,10 @@ namespace BasicInterpreter
             return line.TrimEnd() + ";";
         }
 
-        public static List<TreeNode>GenerateTreeNode(string expression)
+        public static List<TreeNode>GenerateTreeNode(string program)
         {
+            List<string> programs = program.Split("\r\n").ToList();
+            string _program = ConvertProgram(programs);
             Grammar _grammar = new LexicalAndSyntaxAnalysis();
             LanguageData _language = new LanguageData(_grammar);
             Parser _parser = new Parser(_language);
@@ -78,7 +98,7 @@ namespace BasicInterpreter
             }
             else
             {
-                ParseTree parseTree = _parser.Parse(expression);
+                ParseTree parseTree = _parser.Parse(_program);
                 if (parseTree.ParserMessages.Count != 0)
                 {
                     foreach (var item in parseTree.ParserMessages)
