@@ -30,7 +30,7 @@ namespace BasicInterpreter
                     if (programs.IndexOf(item) != programs.Count - 1)
                         _program = _program + line + "\r\n";
                     else
-                        _program = _program + line;
+                        _program = _program + line.Substring(0, line.Length - 1);
                 }
 
             }
@@ -83,7 +83,7 @@ namespace BasicInterpreter
             return line.TrimEnd() + ";";
         }
 
-        public static List<TreeNode>GenerateTreeNode(string program)
+        public static List<TreeNode> GenerateTreeNode(string program)
         {
             List<string> programs = program.Split("\r\n").ToList();
             string _program = ConvertProgram(programs);
@@ -115,7 +115,6 @@ namespace BasicInterpreter
             }
             return new List<TreeNode>();
 
-            // 这里我感觉可以用类似于node.js那种匿名方法的写法
             void getNodes(int pid, ParseTreeNode node)
             {
                 TreeNode newNode = new TreeNode();
@@ -128,7 +127,7 @@ namespace BasicInterpreter
                     getNodes(newNode.id, item);
             }
 
-            List<TreeNode>getChildNodes(int pid, List<TreeNode> nodes)
+            List<TreeNode> getChildNodes(int pid, List<TreeNode> nodes)
             {
                 List<TreeNode> mainNodes = nodes.Where(x => x.pid == pid).ToList();
                 List<TreeNode> otherNodes = nodes.Where(x => x.pid != pid).ToList();

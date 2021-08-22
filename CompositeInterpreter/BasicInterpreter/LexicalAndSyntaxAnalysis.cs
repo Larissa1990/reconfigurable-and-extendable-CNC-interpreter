@@ -4,7 +4,7 @@ using Irony.Parsing;
 namespace BasicInterpreter
 {
     [Language("G code basic commands","1.0","Lexical and syntactic analysis")]
-    public class LexicalAndSyntaxAnalysis: Grammar
+    public class LexicalAndSyntaxAnalysis : Grammar
     {
         #region Private fields
         private NumberLiteral number;
@@ -31,9 +31,9 @@ namespace BasicInterpreter
         private NonTerminal posR;
         private NonTerminal strpos;
         private NonTerminal cirpos;
+        private NonTerminal cir_pos;
         private NonTerminal strPos;
         private NonTerminal cirPos;
-        private NonTerminal position;
         private NonTerminal linearInterpo;
         private NonTerminal circularInterpo;
         private NonTerminal motion;
@@ -58,6 +58,7 @@ namespace BasicInterpreter
         private NonTerminal coolant;
         private NonTerminal suppression;
         private NonTerminal nonMotion;
+        private NonTerminal non_Motion;
         private NonTerminal nonMotions;
         private NonTerminal order;
         private NonTerminal basicBlock;
@@ -113,22 +114,24 @@ namespace BasicInterpreter
             posR = new NonTerminal("R");
             strpos = new NonTerminal("Target Position");
             cirpos = new NonTerminal("Target Position");
-            strPos = new NonTerminal("Target Position");
-            cirPos = new NonTerminal("Target Position");
-            position = new NonTerminal("Target Position");
+            strPos = new NonTerminal("Target Positions");
+            cirPos = new NonTerminal("Target Positions");
+            cir_pos = new NonTerminal("Target Position");
 
-            posX.Rule = ToTerm("X") + expression | ToTerm("X") +"="+ expression;
-            posY.Rule = ToTerm("Y") + expression | ToTerm("Y=") + "="+expression;
-            posZ.Rule = ToTerm("Z") + expression | ToTerm("Z=") + "="+expression;
-            posI.Rule = ToTerm("I") + expression | ToTerm("I=") + "="+expression;
-            posJ.Rule = ToTerm("J") + expression | ToTerm("J=") + "="+expression;
-            posK.Rule = ToTerm("K") + expression | ToTerm("K=") + "="+expression;
-            posR.Rule = ToTerm("R") + expression | ToTerm("R=") + "="+expression;
+
+            posX.Rule = ToTerm("X") + expression | ToTerm("X") + "=" + expression;
+            posY.Rule = ToTerm("Y") + expression | ToTerm("Y") + "=" + expression;
+            posZ.Rule = ToTerm("Z") + expression | ToTerm("Z") + "=" + expression;
+            posI.Rule = ToTerm("I") + expression | ToTerm("I") + "=" + expression;
+            posJ.Rule = ToTerm("J") + expression | ToTerm("J") + "=" + expression;
+            posK.Rule = ToTerm("K") + expression | ToTerm("K") + "=" + expression;
+            posR.Rule = ToTerm("R") + expression | ToTerm("R") + "=" + expression;
             strpos.Rule = posX | posY | posZ;
             strPos.Rule = MakePlusRule(strPos, strpos);
             cirpos.Rule = posI | posJ | posK;
-            cirPos.Rule = MakePlusRule(cirPos, cirpos) | posR;
-            position.Rule = strPos | strPos + cirPos;
+            cir_pos.Rule = MakePlusRule(cir_pos, cirpos);
+            cirPos.Rule = strPos + cir_pos | strPos + posR;
+
             #endregion
             #region Motion Command
             linearInterpo = new NonTerminal("Linear Interpolation");
@@ -139,6 +142,7 @@ namespace BasicInterpreter
             circularInterpo.Rule = ToTerm("G02") | "G2" | "G03" | "G3";
             motion.Rule = linearInterpo | circularInterpo;
             #endregion
+
             #region Non Motion Commands
             toolChange = new NonTerminal("Tool Change Command");
             toolSelection = new NonTerminal("Tool Selection");
@@ -161,6 +165,7 @@ namespace BasicInterpreter
             coolant = new NonTerminal("Coolant Control");
             suppression = new NonTerminal("Suppression Zero Offset");
             nonMotion = new NonTerminal("Non Motion Command");
+            non_Motion = new NonTerminal("Non Motion Commands");
             nonMotions = new NonTerminal("Non Motion Commands");
             order = new NonTerminal("Order");
             basicBlock = new NonTerminal("Basic Block");
@@ -178,7 +183,7 @@ namespace BasicInterpreter
             toolSelection.Rule = ToTerm("T") + number | ToTerm("T") + "=" + number;
             changeTool.Rule = ToTerm("M06") | "M6";
             spindleRotation.Rule = ToTerm("M3") | "M4" | "M5" | "M03" | "M04" | "M05";
-            spindleSpeed.Rule = ToTerm("S") + number | ToTerm("S") +"="+ number;
+            spindleSpeed.Rule = ToTerm("S") + number | ToTerm("S") + "=" + number;
             spindleStop.Rule = ToTerm("M2") | "M30";
             feedUnits.Rule = ToTerm("G94") | "G95";
             feedValue.Rule = ToTerm("F") + number | ToTerm("F") + "=" + number;
@@ -190,7 +195,10 @@ namespace BasicInterpreter
             compensationSelection.Rule = ToTerm("D") + number | ToTerm("D") + "=" + number;
 
             nonMotion.Rule = toolChange | spindleMotion | feedControl | geometry | compensation | coolant | suppression;
-            nonMotions.Rule = MakePlusRule(nonMotions, nonMotion) | Empty;
+            non_Motion.Rule = MakePlusRule(non_Motion, nonMotion);
+            nonMotions.Rule = non_Motion | Empty;
+
+            #endregion
 
             order.Rule = ToTerm("N") + number | ToTerm("N") + "=" + number;
             basicBlock.Rule = nonMotions + linearInterpo + nonMotions + strPos + nonMotions
@@ -204,9 +212,8 @@ namespace BasicInterpreter
             ncBlock.Rule = order + basicBlock;
             ncBlocks.Rule = MakePlusRule(ncBlocks, semi, ncBlock);
 
-
-
-            #endregion
+            this.MarkPunctuation("D", "T", "F", "S", ",", "N", "=", "X", "Y", "Z", "I", "J", "K", "CR");
+            this.MarkTransient(nonMotion, nonMotions, strpos, cirpos);
             this.Root = ncBlocks;
             //this.Root = expression;
         }
