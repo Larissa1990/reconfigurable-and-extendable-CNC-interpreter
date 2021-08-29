@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Irony.Parsing;
 using System.Text.RegularExpressions;
 using System.IO;
+using InterpreterInterface;
 
 namespace BasicInterpreter
 {
@@ -117,14 +118,31 @@ namespace BasicInterpreter
 
             void getNodes(int pid, ParseTreeNode node)
             {
-                TreeNode newNode = new TreeNode();
-                newNode.id = id;
-                id++;
-                newNode.pid = pid;
-                newNode.name = node.ToString();
-                nodes.Add(newNode);
-                foreach (var item in node.ChildNodes)
-                    getNodes(newNode.id, item);
+                string term = node.Term.ToString();
+                if(term.ToLower()=="non motion commands")
+                {
+                    foreach (var item in node.ChildNodes)
+                        getNodes(pid, item);
+                }
+                else
+                {
+                    TreeNode newNode = new TreeNode();
+                    newNode.id = id;
+                    id++;
+                    newNode.pid = pid;
+                    if (term.ToLower() == "expression")
+                    {
+                        newNode.name = ComputeExpression(node).ToString();
+                        nodes.Add(newNode);
+                    }
+                    else
+                    {
+                        newNode.name = node.ToString().Contains("(") ? node.FindTokenAndGetText() : term;
+                        nodes.Add(newNode);
+                        foreach (var item in node.ChildNodes)
+                            getNodes(newNode.id, item);
+                    }
+                }
             }
 
             List<TreeNode> getChildNodes(int pid, List<TreeNode> nodes)
@@ -137,7 +155,93 @@ namespace BasicInterpreter
             }
         }
 
+        public static double ComputeExpressionTest(string expression)
+        {
+            Grammar _grammar = new LexicalAndSyntaxAnalysis();
+            LanguageData _language = new LanguageData(_grammar);
+            Parser _parser = new Parser(_language);
 
+            if (_parser == null || !_parser.Language.CanParse())
+            {
+                Console.WriteLine("File Damaged");
+            }
+            else
+            {
+                ParseTree parseTree = _parser.Parse(expression);
+                if (parseTree.ParserMessages.Count != 0)
+                {
+                    foreach (var item in parseTree.ParserMessages)
+                        Console.WriteLine(item);
+                }
+                else
+                {
+                    return ComputeExpression(parseTree.Root);
+                }
+            }
+            return 0;
+        }
+
+        public static double ComputeExpression(ParseTreeNode node)
+        {
+            Func<ParseTreeNode, double> UnaryExpression = (numNode) =>
+            {
+                string number = numNode.ChildNodes[1].FindTokenAndGetText();
+                return Convert.ToDouble("-" + number);
+            };
+
+            string expType = node.Term.ToString().ToLower();
+
+            if (expType == "binopexpression")
+            {
+                string sympol = node.ChildNodes[1].FindTokenAndGetText();
+                switch (sympol)
+                {
+                    case "+":
+                        return ComputeExpression(node.ChildNodes[0]) + ComputeExpression(node.ChildNodes[2]);
+                    case "-":
+                        return ComputeExpression(node.ChildNodes[0]) - ComputeExpression(node.ChildNodes[2]);
+                    case "*":
+                        return ComputeExpression(node.ChildNodes[0]) * ComputeExpression(node.ChildNodes[2]);
+                    case "/":
+                        return ComputeExpression(node.ChildNodes[0]) / ComputeExpression(node.ChildNodes[2]);
+                    case "^":
+                        return Math.Pow(ComputeExpression(node.ChildNodes[0]), ComputeExpression(node.ChildNodes[2]));
+                }
+            }
+            else if (expType == "primaryexpression")
+            {
+                if (node.ChildNodes[0].Term.ToString() == "number")
+                    return Convert.ToDouble(node.ChildNodes[0].FindTokenAndGetText());
+                else
+                    return ComputeExpression(node.ChildNodes[0]);
+            }
+            else if (expType == "unaryexpression")
+            {
+                return UnaryExpression(node);
+            }
+            else if (expType == "parenthesizedexpression")
+            {
+                return ComputeExpression(node.ChildNodes[0]);
+            }
+            else if (expType == "specialexpression")
+            {
+                string symbol = node.ChildNodes[0].FindTokenAndGetText();
+                switch (symbol)
+                {
+                    case "cos":
+                        return Math.Cos(ComputeExpression(node.ChildNodes[1]));
+                    case "sin":
+                        return Math.Sin(ComputeExpression(node.ChildNodes[1]));
+                    case "tan":
+                        return Math.Tan(ComputeExpression(node.ChildNodes[1]));
+                }
+            }
+            else if (expType == "expression")
+            {
+                return ComputeExpression(node.ChildNodes[0]);
+            }
+            return 0;
+        }
 
     }
 }

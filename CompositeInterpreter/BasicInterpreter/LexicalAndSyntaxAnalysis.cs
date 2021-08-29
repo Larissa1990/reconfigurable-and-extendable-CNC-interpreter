@@ -36,7 +36,6 @@ namespace BasicInterpreter
         private NonTerminal cirPos;
         private NonTerminal linearInterpo;
         private NonTerminal circularInterpo;
-        private NonTerminal motion;
         private NonTerminal toolChange;
         private NonTerminal toolSelection;
         private NonTerminal changeTool;
@@ -84,12 +83,12 @@ namespace BasicInterpreter
 
             #region Expression
             expression = new NonTerminal("Expression");
-            unaryExpression = new NonTerminal("Unary Expression");
-            primaryExpression = new NonTerminal("Primary Expression");
-            parenthesizedExpression = new NonTerminal("Parenthesized Expression");
+            unaryExpression = new NonTerminal("UnaryExpression");
+            primaryExpression = new NonTerminal("PrimaryExpression");
+            parenthesizedExpression = new NonTerminal("ParenthesizedExpression");
             binOpExpression = new NonTerminal("BinOpExpression");
             binOp = new NonTerminal("BinOp");
-            specialExpression = new NonTerminal("Special Expression");
+            specialExpression = new NonTerminal("SpecialExpression");
 
             expression.Rule = binOpExpression | primaryExpression;
             unaryExpression.Rule = ToTerm("-") + number;
@@ -114,9 +113,9 @@ namespace BasicInterpreter
             posR = new NonTerminal("R");
             strpos = new NonTerminal("Target Position");
             cirpos = new NonTerminal("Target Position");
-            strPos = new NonTerminal("Target Positions");
-            cirPos = new NonTerminal("Target Positions");
-            cir_pos = new NonTerminal("Target Position");
+            strPos = new NonTerminal("Target Position");
+            cirPos = new NonTerminal("Target Position");
+            cir_pos = new NonTerminal("Center Position");
 
 
             posX.Rule = ToTerm("X") + expression | ToTerm("X") + "=" + expression;
@@ -134,13 +133,11 @@ namespace BasicInterpreter
 
             #endregion
             #region Motion Command
-            linearInterpo = new NonTerminal("Linear Interpolation");
-            circularInterpo = new NonTerminal("Circular Interpolation");
-            motion = new NonTerminal("Motion Command");
+            linearInterpo = new NonTerminal("Interpolation");
+            circularInterpo = new NonTerminal("Interpolation");
 
             linearInterpo.Rule = ToTerm("G01") | "G1" | "G00" | "G0";
             circularInterpo.Rule = ToTerm("G02") | "G2" | "G03" | "G3";
-            motion.Rule = linearInterpo | circularInterpo;
             #endregion
 
             #region Non Motion Commands
@@ -213,7 +210,9 @@ namespace BasicInterpreter
             ncBlocks.Rule = MakePlusRule(ncBlocks, semi, ncBlock);
 
             this.MarkPunctuation("D", "T", "F", "S", ",", "N", "=", "X", "Y", "Z", "I", "J", "K", "CR");
-            this.MarkTransient(nonMotion, nonMotions, strpos, cirpos);
+            MarkPunctuation(lp, rp);
+            this.MarkTransient(nonMotion, nonMotions, strpos, cirpos, spindleMotion,
+                feedControl, geometry, compensation, toolChange);
             this.Root = ncBlocks;
             //this.Root = expression;
         }

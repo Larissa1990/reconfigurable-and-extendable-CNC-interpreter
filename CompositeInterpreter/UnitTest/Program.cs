@@ -12,14 +12,16 @@ namespace UnitTest
     {
         static void Main(string[] args)
         {
-            string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";
+            string exp = "6*sin(2)";
+            Console.WriteLine(Methods.ComputeExpressionTest(exp));
+            /*string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";
             using(StreamReader sr = new StreamReader(path))
             {
                 string program = sr.ReadToEnd();
 
                 List<string> programs = program.Split("\r\n").ToList();
                 Console.WriteLine(programs.Count);
-                /*string line = sr.ReadLine();
+                string line = sr.ReadLine();
                 List<string> programs = new List<string>();
                 while (line != null)
                 {
@@ -27,9 +29,9 @@ namespace UnitTest
                     line = sr.ReadLine();
                 }
                 string _program = Methods.ConvertProgram(programs);
-                Console.WriteLine(_program);*/
+                Console.WriteLine(_program);
 
-            }
+            }*/
             /*
             Grammar _grammar = new LexicalAndSyntaxAnalysis();
             LanguageData _language = new LanguageData(_grammar);
@@ -56,7 +58,7 @@ namespace UnitTest
             Console.Read();
         }
 
-        static void WriteNode(ParseTreeNode node, string space)
+        /*static void WriteNode(ParseTreeNode node, string space)
         {
             Console.WriteLine(space+node.ToString());
             if(node.ChildNodes.Count != 0)
@@ -70,7 +72,7 @@ namespace UnitTest
                 space = space.Substring(0, space.Length - 2);
             }
 
-        }
+        }*/
 
     }
 }
