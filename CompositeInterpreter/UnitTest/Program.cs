@@ -14,15 +14,15 @@ namespace UnitTest
         {
             Position first = new Position()
             {
-                x = 0,
+                x = 1.5,
                 y = 2,
                 z = 0
             };
 
             Position second = new Position()
             {
-                x = Math.Sqrt(3),
-                y = 1,
+                x = 1.5,
+                y = 0,
                 z = 0
             };
 
@@ -32,11 +32,18 @@ namespace UnitTest
                 y = 0,
                 z = 0
             };
+            Position fourth = new Position()
+            {
+                x = 2,
+                y = 2,
+                z = 0
+            };
 
-            double angle = Methods.polarCoor(first, second, "G17");
-            Console.WriteLine(2 * Math.Cos(angle + Math.PI / 2)+first.x);
-            Console.WriteLine(2 * Math.Sin(angle + Math.PI / 2)+first.y);
-
+            Position cross = Methods.CrossPosition(first, second, third, fourth, "G17");
+            if (cross != null)
+            {
+                Console.WriteLine(string.Format("{0},{1}", cross.x, cross.y));
+            }
             //Console.WriteLine(Methods.ComputeAngle(first, second, third, "G42", "G17")*180/Math.PI);
 
             /*string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";

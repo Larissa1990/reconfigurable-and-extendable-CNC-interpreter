@@ -281,7 +281,174 @@ namespace BasicInterpreter
             return angle;
         }
 
+        public static Position ComputeCenterWithRadiusKnown(Position start,Position end,double radius,string motionMode,string workPlane)
+        {
+            double angle = polarCoor(start, end, workPlane);
+            double length = ComputePathLength(start, end) / 2;
+            double includedAngle = Math.Acos(length / Math.Abs(radius));
+            double _angle = 0;
+            if ((motionMode == "G2" && radius > 0) || (motionMode == "G3" && radius < 0))
+            {
+                _angle = angle - includedAngle;
+            }
+            else
+                _angle = angle + includedAngle;
 
+            Position center = new Position();
+            switch (workPlane)
+            {
+                case "G17":
+                    center.x = start.x + Math.Abs(radius) * Math.Cos(_angle);
+                    center.y = start.y + Math.Abs(radius) * Math.Sin(_angle);
+                    center.z = start.z;
+                    break;
+                case "G18":
+                    center.x= start.x + Math.Abs(radius) * Math.Cos(_angle);
+                    center.y = start.y;
+                    center.z = start.z + Math.Abs(radius) * Math.Sin(_angle);
+                    break;
+                case "G19":
+                    center.x = start.x;
+                    center.y = start.y + Math.Abs(radius) * Math.Cos(_angle);
+                    center.z = start.z + Math.Abs(radius) * Math.Sin(_angle);
+                    break;
+            }
+            return center;
+        }
+
+        public static double ComputePathLength(Position start, Position end)
+        {
+            return Math.Sqrt(Math.Pow(start.x - end.x, 2) + Math.Pow(start.y - end.y, 2) + Math.Pow(start.z - end.z, 2));
+        }
+
+        public static Position StartRadiusCompensation(Position first,Position second, Position third, string compensationMode, string workPlane
+            ,double radius)
+        {
+            double includedAngle = ComputeAngle(first, second, third, compensationMode, workPlane);
+            if (includedAngle < Math.PI / 2)
+            {
+
+                if (compensationMode == "G41")
+                {
+
+                }
+            }
+            throw new NotImplementedException();
+        }
+
+        // orientation=-1 means CW, orientation=1 means CCW
+        public static Position RotatePosition(Position start,double angle, double rotateAngle, int orientation, double radius, string workPlane)
+        {
+            Position _pos = new Position();
+            double _angle = angle + orientation * rotateAngle;
+            switch (workPlane)
+            {
+                case "G17":
+                    _pos.x = start.x + radius * Math.Cos(_angle);
+                    _pos.y = start.y + radius * Math.Sin(_angle);
+                    _pos.z = start.z;
+                    break;
+                case "G18":
+                    _pos.x = start.x + radius * Math.Cos(_angle);
+                    _pos.z = start.z + radius * Math.Sin(_angle);
+                    _pos.y = start.y;
+                    break;
+                case "G19":
+                    _pos.x = start.x;
+                    _pos.y = start.y + radius * Math.Cos(_angle);
+                    _pos.z = start.z + radius * Math.Sin(_angle);
+                    break;
+            }
+            return _pos;
+        }
+
+        public static Position CrossPosition(Position line1_start,Position line1_end,Position line2_start,Position line2_end,string workPlane)
+        {
+            Position cross = new Position();
+            double?[] line1 = new double?[] { 0, 0 };
+            double?[] line2 = new double?[] { 0, 0 };
+            double[] pos;
+            switch (workPlane)
+            {
+                case "G17":
+                    line1 = LineFunction(line1_start.x, line1_end.x, line1_start.y, line1_end.y);
+                    line2 = LineFunction(line2_start.x, line2_end.x, line2_start.y, line2_end.y);
+                    cross.z = line1_start.z;
+                    pos = CrossPosition(line1, line2);
+                    if (pos == null) return null;
+                    else
+                    {
+                        cross.x = pos[0];
+                        cross.y = pos[1];
+                    }
+                    break;
+                case "G18":
+                    line1 = LineFunction(line1_start.x, line1_end.x, line1_start.z, line1_end.z);
+                    line2 = LineFunction(line2_start.x, line2_end.x, line2_start.z, line2_end.z);
+                    cross.y = line1_start.y;
+                    pos = CrossPosition(line1, line2);
+                    if (pos == null) return null;
+                    else
+                    {
+                        cross.x = pos[0];
+                        cross.z = pos[1];
+                    }
+                    break;
+                case "G19":
+                    line1 = LineFunction(line1_start.y, line1_end.y, line1_start.z, line1_end.z);
+                    line2 = LineFunction(line2_start.y, line2_end.y, line2_start.z, line2_end.z);
+                    cross.x = line1_start.x;
+                    pos = CrossPosition(line1, line2);
+                    if (pos == null) return null;
+                    else
+                    {
+                        cross.y = pos[0];
+                        cross.z = pos[1];
+                    }
+                    break;
+            }
+
+            return cross;
+
+            double?[] LineFunction(double x1,double x2,double y1, double y2)
+            {
+                double?[] line = new double?[2];
+                if (x1 == x2)
+                {
+                    line[0] = null;
+                    line[1] = x1;
+                }
+                else
+                {
+                    line[0] = (y1 - y2) / (x1 - x2);
+                    line[1] = y1 - line[0] * x1;
+                }
+                return line;
+            }
+
+            double[] CrossPosition(double?[] line1, double?[] line2)
+            {
+                if (line1[0] == line2[0])
+                    return null;
+                else
+                {
+                    if (line1[0] == null)
+                    {
+                        return new double[]{ Convert.ToDouble(line1[1]),Convert.ToDouble(line2[0]*line1[1]+line2[1])};
+                    }
+                    if(line2[0]==null)
+                    {
+                        return new double[] { Convert.ToDouble(line2[1]), Convert.ToDouble(line1[0] * line2[1] + line1[1]) };
+                    }
+
+                    return new double[]
+                    {
+                        Convert.ToDouble((line2[1]-line1[1])/(line1[0]-line2[0])),
+                        Convert.ToDouble((line2[0]*line1[1]-line1[0]*line2[1])/(line2[0]-line1[0]))
+                    };
+                }
+            }
+        }
 
     }
 }
