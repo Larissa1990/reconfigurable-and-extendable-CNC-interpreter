@@ -243,5 +243,45 @@ namespace BasicInterpreter
             return 0;
         }
 
+        public static double ComputeAngle(Position first, Position second, Position third, string compensationMode, string workPlane)
+        {
+            double angle1 = polarCoor(first, second, workPlane);
+            double angle2 = polarCoor(second, third, workPlane);
+            double det = angle2 - angle1;
+            if (compensationMode == "G41")
+                return Math.PI - det;
+            else
+                return Math.PI + det;
+        }
+
+        public static double polarCoor(Position start, Position end, string workPlane)
+        {
+            double a = 0, b = 0;
+            switch (workPlane)
+            {
+                case "G17":
+                    a = end.x - start.x;
+                    b = end.y - start.y;
+                    break;
+                case "G18":
+                    a = end.x - start.x;
+                    b = end.z - start.z;
+                    break;
+                case "G19":
+                    a = end.y - start.y;
+                    b = end.z - start.z;
+                    break;
+            }
+            double r = Math.Sqrt(a * a + b * b);
+            double angle = Math.Asin(b / r);
+            if (Math.Cos(angle) * (a / r) < 0)
+            {
+                angle = -(angle + Math.PI);
+            }
+            return angle;
+        }
+
+
+
     }
 }

@@ -4,7 +4,7 @@ using BasicInterpreter;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using InterpreterInterface;
 
 namespace UnitTest
 {
@@ -12,8 +12,33 @@ namespace UnitTest
     {
         static void Main(string[] args)
         {
-            string exp = "6*sin(2)";
-            Console.WriteLine(Methods.ComputeExpressionTest(exp));
+            Position first = new Position()
+            {
+                x = 0,
+                y = 2,
+                z = 0
+            };
+
+            Position second = new Position()
+            {
+                x = Math.Sqrt(3),
+                y = 1,
+                z = 0
+            };
+
+            Position third = new Position()
+            {
+                x = 0,
+                y = 0,
+                z = 0
+            };
+
+            double angle = Methods.polarCoor(first, second, "G17");
+            Console.WriteLine(2 * Math.Cos(angle + Math.PI / 2)+first.x);
+            Console.WriteLine(2 * Math.Sin(angle + Math.PI / 2)+first.y);
+
+            //Console.WriteLine(Methods.ComputeAngle(first, second, third, "G42", "G17")*180/Math.PI);
+
             /*string path = @"C:\Users\Larissa\Desktop\Components1119\programs\milling#1.txt";
             using(StreamReader sr = new StreamReader(path))
             {

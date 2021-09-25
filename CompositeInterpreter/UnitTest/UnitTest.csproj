@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BasicInterpreter\BasicInterpreter.csproj" />
+    <ProjectReference Include="..\InterpreterInterface\InterpreterInterface.csproj" />
   </ItemGroup>
 
 </Project>
