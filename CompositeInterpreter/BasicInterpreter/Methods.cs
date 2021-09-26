@@ -321,14 +321,25 @@ namespace BasicInterpreter
             return Math.Sqrt(Math.Pow(start.x - end.x, 2) + Math.Pow(start.y - end.y, 2) + Math.Pow(start.z - end.z, 2));
         }
 
-        public static Position StartRadiusCompensation(Position first,Position second, Position third, string compensationMode, string workPlane
+        public static List<Position> StartRadiusCompensation(Position first,Position second, Position third, string compensationMode, string workPlane
             ,double radius)
         {
             double includedAngle = ComputeAngle(first, second, third, compensationMode, workPlane);
-            if (includedAngle < Math.PI / 2)
-            {
+            List<Position> positions = new List<Position>();
 
+            if (includedAngle <= Math.PI / 2)
+            { 
                 if (compensationMode == "G41")
+                {
+                    Position crossPos = CrossPosition(
+                        RotatePosition(first, polarCoor(first, second, workPlane), Math.PI / 2, 1, radius, workPlane),
+                        RotatePosition(second, polarCoor(first, second, workPlane), Math.PI / 2, 1, radius, workPlane),
+                        RotatePosition(second, polarCoor(second, third, workPlane), Math.PI / 2, 1, radius, workPlane),
+                        RotatePosition(third, polarCoor(second, third, workPlane), Math.PI / 2, 1, radius, workPlane),
+                        workPlane);
+                    positions.Add(crossPos);
+                }
+                else
                 {
 
                 }
